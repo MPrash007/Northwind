@@ -10,13 +10,14 @@ import { clerkWebhookHandler } from './webhooks/clerk';
 import { getEnv } from './lib/env';
 import keepAliveCron from "./lib/cron";
 
+import meRouter from "./routes/meRouter";
+import productRouter from "./routes/productRouter";
+import streamRouter from "./routes/streamRouter";
+
 const env = getEnv()
 const app = express();
 
-// ── Health check (no middleware, responds immediately) ──
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok"});
-});
+
 
 const rawJson = express.raw({type: "application/json", limit: "1mb"});
 
@@ -41,7 +42,16 @@ app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware);
 
+// ── Health check (no middleware, responds immediately) ──
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok"});
+});
+
 // ── API routes would go here ──
+
+app.use("/api/me", meRouter);
+app.use("/api/products", productRouter);
+app.use("/api/stream", streamRouter);
 
 // ── SPA catch-all (serves index.html for client-side routing) ──
 if (hasPublicDir) {
