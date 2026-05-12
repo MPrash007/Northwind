@@ -8,13 +8,14 @@ import path from "node:path";
 import { clerkMiddleware } from '@clerk/express';
 import { clerkWebhookHandler } from './webhooks/clerk';
 import { getEnv } from './lib/env';
+import keepAliveCron from "./lib/cron";
 
 const env = getEnv()
 const app = express();
 
 // ── Health check (no middleware, responds immediately) ──
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+  res.json({ status: "ok"});
 });
 
 const rawJson = express.raw({type: "application/json", limit: "1mb"});
@@ -56,4 +57,11 @@ if (hasPublicDir) {
   });
 }
 
-app.listen(env.PORT, () => console.log("listening on port:", env.PORT))
+
+
+app.listen(env.PORT, () => {
+  console.log("listening on port:", env.PORT)
+  if(env.NODE_ENV === "production"){
+    keepAliveCron.start();
+  }
+}) 
