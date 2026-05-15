@@ -18,6 +18,7 @@ import streamRouter from "./routes/streamRouter";
 import checkoutRouter from "./routes/checkoutRouter";
 import { polarWebhookHandler } from "./webhooks/polar";
 import { sentryClerkUserMiddleware } from "./middleware/sentryClerkUser";
+import adminRouter from "./routes/adminRouter";
 
 const env = getEnv()
 const app = express();
@@ -62,6 +63,7 @@ app.use("/api/me", meRouter);
 app.use("/api/products", productRouter);
 app.use("/api/stream", streamRouter);
 app.use("/api/checkout", checkoutRouter);
+app.use("/api/admin", adminRouter);
 
 // ── SPA catch-all (serves index.html for client-side routing) ──
 if (hasPublicDir) {
