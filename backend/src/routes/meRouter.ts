@@ -5,7 +5,7 @@ import { getLocalUser } from "../lib/users";
 
 const router = Router();
 
-router.get("/", (req,res, next)=>{
+router.get("/", async (req,res, next)=>{
     try {
         const {userId, isAuthenticated} =  getAuth(req);
 
@@ -14,7 +14,7 @@ router.get("/", (req,res, next)=>{
             return;
         }
 
-        const user = getLocalUser(userId);
+        const user = await getLocalUser(userId);
 
         res.json({user});
     } catch (error) {

@@ -30,35 +30,21 @@ const rawJson = express.raw({type: "application/json", limit: "1mb"});
 
 // it's important that you don't parse the webhook event data, it should be in the raw format
 
-app.post("/webhooks/clerk", rawJson, (req,res) =>{
-    void clerkWebhookHandler(req,res);
+app.post("/webhooks/clerk", rawJson, (req, res) => {
+  void clerkWebhookHandler(req, res);
 });
-app.post("/webhooks/polar", rawJson, (req,res) =>{
-    void polarWebhookHandler(req,res);
+app.post("/webhooks/polar", rawJson, (req, res) => {
+  void polarWebhookHandler(req, res);
 });
 
-// ── Serve static files BEFORE auth middleware ──
-// This ensures index.html, JS, CSS, and images are served instantly
-// without waiting for Clerk's middleware to verify tokens.
-const publicDir = path.join(process.cwd(), "public");
-const hasPublicDir = fs.existsSync(publicDir);
-
-if (hasPublicDir) {
-  app.use(express.static(publicDir));
-}
-
-// ── API middleware (only needed for API routes) ──
 app.use(express.json());
 app.use(cors());
-app.use(clerkMiddleware);
-app.use(sentryClerkUserMiddleware)
+app.use(clerkMiddleware());
+app.use(sentryClerkUserMiddleware);
 
-// ── Health check (no middleware, responds immediately) ──
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok"});
+  res.json({ ok: true });
 });
-
-// ── API routes would go here ──
 
 app.use("/api/me", meRouter);
 app.use("/api/products", productRouter);
@@ -67,18 +53,22 @@ app.use("/api/checkout", checkoutRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/orders", orderRouter);
 
+const publicDir = path.join(process.cwd(), "public");
+if (fs.existsSync(publicDir)) {
+  app.use(express.static(publicDir));
 
-// ── SPA catch-all (serves index.html for client-side routing) ──
-if (hasPublicDir) {
   app.get("/{*any}", (req, res, next) => {
-    if (req.path.startsWith("/api") || req.path.startsWith("/webhooks") || req.path.startsWith("/health")) {
+    if (req.method !== "GET" && req.method !== "HEAD") {
       next();
       return;
     }
 
-    res.sendFile(path.join(publicDir, "index.html"), (err) => {
-      if (err) next(err);
-    });
+    if (req.path.startsWith("/api") || req.path.startsWith("/webhooks")) {
+      next();
+      return;
+    }
+
+    res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
   });
 }
 
@@ -96,10 +86,9 @@ app.use(
   },
 );
 
-
 app.listen(env.PORT, () => {
-  console.log("listening on port:", env.PORT)
-  if(env.NODE_ENV === "production"){
+  console.log("Listening on port:", env.PORT);
+  if (env.NODE_ENV === "production") {
     keepAliveCron.start();
   }
-}) 
+});
