@@ -11,6 +11,8 @@ import {SentryDemoPage }from './pages/SentryDemoPage';
 import OrderDetailPage from "./pages/OrderDetailPage";
 import OrderSummaryPage from "./pages/OrderSummaryPage";
 import OrderChatPage from "./pages/OrderChatPage";
+import OrderVideoPage from "./pages/OrderVideoPage";
+
 
 function App() {
  
@@ -31,6 +33,11 @@ function App() {
          <Route path="/checkout/return" element={<CheckoutReturnPage />} />
 
         <Route path="/demo-sentry" element={<SentryDemoPage />} />
+
+         <Route
+          path="/orders/:id/call"
+          element={isSignedIn ? <OrderVideoPage /> : <Navigate to={"/"} replace />}
+        />
 
         {/* NESTED ROUTES */}
         <Route path="/orders/:id" element={<OrderDetailPage />}>
