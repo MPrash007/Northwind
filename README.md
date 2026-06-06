@@ -1,4 +1,4 @@
-# Northwind E-Commerce Platform
+# Shopzy E-Commerce Platform
 
 A full-stack e-commerce web application featuring user authentication, product management, checkout, order tracking, and integrated chat & video support.
 
